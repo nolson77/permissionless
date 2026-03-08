@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Permissionless</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:           #F2F2F7;
+  --surface:      #FFFFFF;
+  --primary:      #007AFF;
+  --green:        #34C759;
+  --orange:       #FF9500;
+  --red:          #FF3B30;
+  --indigo:       #5856D6;
+  --gray-1:       #1C1C1E;
+  --gray-2:       #3A3A3C;
+  --gray-3:       #636366;
+  --gray-4:       #8E8E93;
+  --gray-5:       #AEAEB2;
+  --gray-6:       #D1D1D6;
+  --gray-7:       #E5E5EA;
+  --gray-8:       #F2F2F7;
+  --separator:    rgba(60,60,67,0.13);
+  --radius:       13px;
+  --radius-sm:    8px;
+  --font:         -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+  --shadow:       0 2px 16px rgba(0,0,0,0.08);
+  --shadow-sm:    0 1px 4px rgba(0,0,0,0.06);
+  --transition:   0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html, body {
+  height: 100%;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--gray-1);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Layout ──────────────────────────────────────────────────────────────── */
+.app { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px 12px;
+  background: rgba(242,242,247,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--separator);
+  position: sticky; top: 0; z-index: 100;
+  min-height: 52px;
+}
+.topbar-left { display: flex; align-items: center; gap: 6px; }
+.back-btn {
+  display: none; align-items: center; gap: 2px;
+  background: none; border: none; color: var(--primary);
+  font-size: 17px; font-family: var(--font); cursor: pointer;
+  padding: 4px 0; letter-spacing: -0.2px;
+}
+.back-btn.visible { display: flex; }
+.back-arrow { font-size: 18px; line-height: 1; margin-top: -1px; }
+.topbar-title {
+  font-size: 17px; font-weight: 600; color: var(--gray-1);
+  letter-spacing: -0.3px;
+}
+.wordmark {
+  font-size: 17px; font-weight: 700; color: var(--gray-1);
+  letter-spacing: -0.8px;
+}
+.wordmark span { color: var(--primary); }
+
+.scroll-area {
+  flex: 1; overflow-y: auto;
+  padding: 0 0 40px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Sections ─────────────────────────────────────────────────────────────── */
+.section { padding: 0 16px; margin-top: 28px; }
+.section-header {
+  font-size: 13px; font-weight: 600; letter-spacing: 0.06em;
+  color: var(--gray-4); text-transform: uppercase;
+  padding: 0 4px; margin-bottom: 8px;
+}
+
+/* ── Cards ────────────────────────────────────────────────────────────────── */
+.card-group {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+.card-row {
+  display: flex; align-items: center;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: background var(--transition);
+  position: relative;
+  text-decoration: none; color: inherit;
+}
+.card-row:not(:last-child)::after {
+  content: '';
+  position: absolute; bottom: 0; left: 56px; right: 0;
+  height: 1px; background: var(--separator);
+}
+.card-row:active { background: var(--gray-8); }
+
+.card-icon {
+  width: 38px; height: 38px;
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0; margin-right: 13px;
+  background: var(--gray-8);
+}
+.card-body { flex: 1; min-width: 0; }
+.card-name {
+  font-size: 17px; font-weight: 500; color: var(--gray-1);
+  letter-spacing: -0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.card-sub {
+  font-size: 14px; color: var(--gray-4); margin-top: 1px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.card-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.chevron { color: var(--gray-5); font-size: 14px; font-weight: 600; }
+
+/* ── Badges ───────────────────────────────────────────────────────────────── */
+.badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 600; letter-spacing: 0.01em;
+  border-radius: 20px; padding: 2px 8px; line-height: 1.4;
+}
+.badge-red    { background: rgba(255,59,48,0.12);  color: var(--red);    }
+.badge-orange { background: rgba(255,149,0,0.14);  color: #CC7700;       }
+.badge-green  { background: rgba(52,199,89,0.14);  color: #228B22;       }
+.badge-gray   { background: rgba(142,142,147,0.14);color: var(--gray-3); }
+.badge-blue   { background: rgba(0,122,255,0.12);  color: var(--primary);}
+.badge-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.dot-red    { background: var(--red);    }
+.dot-orange { background: var(--orange); }
+
+/* ── Attention banner ─────────────────────────────────────────────────────── */
+.attention-card {
+  margin: 20px 16px 0;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+.attention-header {
+  padding: 12px 16px 10px;
+  border-bottom: 1px solid var(--separator);
+  display: flex; align-items: center; gap: 8px;
+}
+.attention-title { font-size: 15px; font-weight: 600; color: var(--gray-1); }
+.attention-row {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 16px; cursor: pointer;
+  transition: background var(--transition);
+}
+.attention-row:not(:last-child) { border-bottom: 1px solid var(--separator); }
+.attention-row:active { background: var(--gray-8); }
+.attention-icon { font-size: 16px; margin-top: 1px; flex-shrink: 0; }
+.attention-body { flex: 1; }
+.attention-msg { font-size: 15px; font-weight: 500; color: var(--gray-1); }
+.attention-sub { font-size: 13px; color: var(--gray-4); margin-top: 2px; }
+
+/* ── Hero stat row ─────────────────────────────────────────────────────────── */
+.stat-row {
+  display: flex; gap: 10px;
+  padding: 20px 16px 0;
+}
+.stat-card {
+  flex: 1; background: var(--surface);
+  border-radius: var(--radius);
+  padding: 14px 14px 12px;
+  box-shadow: var(--shadow-sm);
+}
+.stat-value { font-size: 28px; font-weight: 700; letter-spacing: -1px; color: var(--gray-1); }
+.stat-value.red    { color: var(--red);    }
+.stat-value.orange { color: var(--orange); }
+.stat-label { font-size: 12px; color: var(--gray-4); margin-top: 2px; font-weight: 500; }
+
+/* ── Greeting ─────────────────────────────────────────────────────────────── */
+.greeting {
+  padding: 22px 20px 0;
+}
+.greeting-line {
+  font-size: 28px; font-weight: 700; letter-spacing: -0.8px; color: var(--gray-1);
+}
+.greeting-sub { font-size: 15px; color: var(--gray-4); margin-top: 4px; }
+
+/* ── Detail page ──────────────────────────────────────────────────────────── */
+.detail-hero {
+  padding: 24px 20px 20px;
+  display: flex; align-items: center; gap: 16px;
+}
+.detail-icon {
+  width: 56px; height: 56px; border-radius: 14px;
+  background: var(--gray-8);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; flex-shrink: 0;
+}
+.detail-name { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+.detail-sub  { font-size: 15px; color: var(--gray-4); margin-top: 3px; }
+
+.info-card {
+  margin: 0 16px 0;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+.info-row {
+  display: flex; align-items: flex-start;
+  padding: 12px 16px; gap: 12px;
+}
+.info-row:not(:last-child) { border-bottom: 1px solid var(--separator); }
+.info-label {
+  font-size: 15px; color: var(--gray-4); flex-shrink: 0;
+  width: 110px; padding-top: 1px;
+}
+.info-value { font-size: 15px; color: var(--gray-1); font-weight: 500; flex: 1; }
+.info-value.mono { font-family: 'SF Mono', 'Menlo', monospace; font-size: 13px; color: var(--gray-3); }
+.info-value.warning { color: var(--orange); }
+.info-value.danger  { color: var(--red);    }
+
+/* ── Buttons ──────────────────────────────────────────────────────────────── */
+.btn-group { padding: 16px 16px 0; display: flex; flex-direction: column; gap: 10px; }
+.btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; padding: 15px; border-radius: var(--radius);
+  font-size: 17px; font-weight: 600; font-family: var(--font);
+  cursor: pointer; border: none; transition: opacity var(--transition);
+}
+.btn:active { opacity: 0.75; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-secondary { background: var(--surface); color: var(--primary); box-shadow: var(--shadow-sm); }
+.btn-danger  { background: var(--surface); color: var(--red); box-shadow: var(--shadow-sm); }
+
+/* ── Fab (add) ────────────────────────────────────────────────────────────── */
+.fab {
+  position: fixed; bottom: 28px; right: 20px;
+  width: 52px; height: 52px; border-radius: 50%;
+  background: var(--primary); color: #fff;
+  font-size: 26px; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 16px rgba(0,122,255,0.4);
+  cursor: pointer; border: none;
+  transition: transform var(--transition), box-shadow var(--transition);
+  z-index: 50;
+}
+.fab:active { transform: scale(0.92); box-shadow: 0 2px 8px rgba(0,122,255,0.3); }
+
+/* ── Form ─────────────────────────────────────────────────────────────────── */
+.form-group { padding: 0 16px; margin-top: 24px; }
+.form-label {
+  font-size: 13px; font-weight: 600; color: var(--gray-4);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  margin-bottom: 8px; display: block; padding: 0 4px;
+}
+.form-field {
+  display: block; width: 100%;
+  padding: 13px 16px;
+  font-size: 17px; font-family: var(--font); color: var(--gray-1);
+  background: var(--surface); border: none; border-radius: var(--radius);
+  box-shadow: var(--shadow-sm); outline: none;
+  transition: box-shadow var(--transition);
+}
+.form-field:focus { box-shadow: 0 0 0 3px rgba(0,122,255,0.2); }
+select.form-field { -webkit-appearance: none; appearance: none; cursor: pointer; }
+textarea.form-field { resize: vertical; min-height: 80px; line-height: 1.5; }
+
+/* ── Empty state ─────────────────────────────────────────────────────────── */
+.empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 48px 32px; text-align: center;
+}
+.empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.4; }
+.empty-title { font-size: 20px; font-weight: 600; color: var(--gray-3); }
+.empty-sub { font-size: 15px; color: var(--gray-5); margin-top: 6px; }
+
+/* ── Animations ──────────────────────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate { animation: fadeUp 0.28s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+
+/* ── Verified badge row ──────────────────────────────────────────────────── */
+.verify-banner {
+  margin: 16px 16px 0;
+  background: rgba(255,149,0,0.1);
+  border: 1px solid rgba(255,149,0,0.25);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  display: flex; align-items: center; gap: 12px;
+  cursor: pointer;
+}
+.verify-banner-text { flex: 1; font-size: 14px; color: #CC7700; font-weight: 500; }
+
+/* ── Risk indicator ──────────────────────────────────────────────────────── */
+.risk-row {
+  display: flex; align-items: center; gap: 6px;
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar" id="topbar">
+    <div class="topbar-left">
+      <button class="back-btn" id="backBtn" onclick="goBack()">
+        <span class="back-arrow">‹</span>
+        <span id="backLabel">Agents</span>
+      </button>
+      <span class="wordmark" id="wordmark">permission<span>less</span></span>
+    </div>
+    <div id="topbarRight"></div>
+  </div>
+
+  <div class="scroll-area" id="main"></div>
+
+  <button class="fab" id="fab" onclick="showFabAction()" title="Add">+</button>
+</div>
+
+<script>
+// ── State ─────────────────────────────────────────────────────────────────────
+const state = {
+  view: 'dashboard',
+  agent: null,
+  permission: null,
+  agents: [],
+  dashboard: {},
+  viewHistory: [],
+};
+
+// ── API ───────────────────────────────────────────────────────────────────────
+const api = {
+  async get(path)         { const r = await fetch(path); return r.json(); },
+  async post(path, body)  { const r = await fetch(path, { method: 'POST',   headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) }); return r.json(); },
+  async put(path, body)   { const r = await fetch(path, { method: 'PUT',    headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) }); return r.json(); },
+  async del(path)         { const r = await fetch(path, { method: 'DELETE' }); return r.json(); },
+};
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+function navigate(view, data = {}) {
+  state.viewHistory.push({ view: state.view, agent: state.agent, permission: state.permission });
+  state.view = view;
+  if (data.agent)      state.agent      = data.agent;
+  if (data.permission) state.permission = data.permission;
+  render();
+}
+
+function goBack() {
+  const prev = state.viewHistory.pop();
+  if (!prev) return;
+  state.view       = prev.view;
+  state.agent      = prev.agent;
+  state.permission = prev.permission;
+  render();
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function riskBadge(level) {
+  if (!level) return '';
+  const cls = { High: 'red', Medium: 'orange', Low: 'green' }[level] || 'gray';
+  return `<span class="badge badge-${cls}">${level} risk</span>`;
+}
+function statusBadge(status) {
+  const cls = { Active: 'green', Inactive: 'gray', 'Needs Review': 'orange' }[status] || 'gray';
+  return `<span class="badge badge-${cls}">${status}</span>`;
+}
+function accessBadge(level) {
+  const cls = { Admin: 'red', Editor: 'blue', Viewer: 'green', 'Read-Only': 'green', API: 'blue' }[level] || 'gray';
+  return `<span class="badge badge-${cls}">${level}</span>`;
+}
+function formatDate(d) {
+  if (!d) return '<span style="color:var(--gray-5)">Not recorded</span>';
+  return new Date(d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+}
+function greeting() {
+  const h = new Date().getHours();
+  if (h < 12) return 'Good morning';
+  if (h < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+
+// ── Topbar ────────────────────────────────────────────────────────────────────
+function updateTopbar(showBack, backLabel = 'Agents', title = '', rightHtml = '') {
+  const back = document.getElementById('backBtn');
+  const wordmark = document.getElementById('wordmark');
+  const titleEl = document.getElementById('topbarTitle');
+  const right = document.getElementById('topbarRight');
+
+  if (showBack) {
+    back.classList.add('visible');
+    document.getElementById('backLabel').textContent = backLabel;
+    wordmark.style.display = 'none';
+  } else {
+    back.classList.remove('visible');
+    wordmark.style.display = '';
+  }
+  right.innerHTML = rightHtml;
+}
+
+// ── Views ─────────────────────────────────────────────────────────────────────
+
+async function renderDashboard() {
+  updateTopbar(false);
+  document.getElementById('fab').style.display = 'flex';
+
+  const [dash, agents] = await Promise.all([
+    api.get('/api/dashboard'),
+    api.get('/api/agents'),
+  ]);
+  state.agents = agents;
+  state.dashboard = dash;
+
+  const attentionHtml = dash.attention && dash.attention.length > 0
+    ? `<div class="attention-card animate">
+        <div class="attention-header">
+          <span style="font-size:16px">🔔</span>
+          <span class="attention-title">Needs your attention</span>
+        </div>
+        ${dash.attention.map(a => `
+          <div class="attention-row" onclick="navigate('agent-detail', { agent: state.agents.find(ag => ag.id === '${a.agent_id}') || {} })">
+            <span class="attention-icon">${a.icon}</span>
+            <div class="attention-body">
+              <div class="attention-msg">${a.message}</div>
+              <div class="attention-sub">${a.sub}</div>
+            </div>
+            <span class="chevron">›</span>
+          </div>
+        `).join('')}
+      </div>` : '';
+
+  const agentCards = agents.map(a => {
+    const riskDot = a.highRiskCount   ? `<span class="badge-dot dot-red"></span>` :
+                    a.mediumRiskCount  ? `<span class="badge-dot dot-orange"></span>` : '';
+    const countLabel = a.activeCount === 1 ? '1 active permission' : `${a.activeCount} active permissions`;
+    return `
+      <div class="card-row" onclick="showAgent('${a.id}')">
+        <div class="card-icon">${a.icon}</div>
+        <div class="card-body">
+          <div class="card-name">${a.name}</div>
+          <div class="card-sub">${a.provider} · ${a.type}</div>
+        </div>
+        <div class="card-right">
+          ${riskDot}
+          <span class="chevron">›</span>
+        </div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('main').innerHTML = `
+    <div class="greeting animate">
+      <div class="greeting-line">${greeting()}, Nick.</div>
+      <div class="greeting-sub">${new Date().toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric'})}</div>
+    </div>
+
+    <div class="stat-row animate">
+      <div class="stat-card">
+        <div class="stat-value">${dash.activePermissions}</div>
+        <div class="stat-label">Active grants</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value ${dash.highRiskCount > 0 ? 'red' : ''}">${dash.highRiskCount}</div>
+        <div class="stat-label">High risk</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value ${dash.neverVerifiedCount > 0 ? 'orange' : ''}">${dash.neverVerifiedCount}</div>
+        <div class="stat-label">Never verified</div>
+      </div>
+    </div>
+
+    ${attentionHtml}
+
+    <div class="section animate">
+      <div class="section-header">Your Agents</div>
+      <div class="card-group">${agentCards}</div>
+    </div>
+  `;
+}
+
+async function showAgent(agentId) {
+  const agents = state.agents.length ? state.agents : await api.get('/api/agents');
+  const agent = agents.find(a => a.id === agentId);
+  navigate('agent-detail', { agent });
+}
+
+async function renderAgentDetail() {
+  const agent = state.agent;
+  updateTopbar(true, 'Home', agent.name);
+  document.getElementById('fab').style.display = 'flex';
+
+  const permissions = await api.get(`/api/permissions?agent_id=${agent.id}`);
+  const active   = permissions.filter(p => p.status === 'Active');
+  const inactive = permissions.filter(p => p.status !== 'Active');
+
+  const permRow = (p) => `
+    <div class="card-row" onclick="showPermission('${p.id}')">
+      <div class="card-icon" style="font-size:17px; background:${p.risk_level==='High'?'rgba(255,59,48,0.08)':p.risk_level==='Medium'?'rgba(255,149,0,0.08)':'rgba(52,199,89,0.08)'}">
+        ${p.risk_level === 'High' ? '🔐' : p.risk_level === 'Medium' ? '🔑' : '🗝️'}
+      </div>
+      <div class="card-body">
+        <div class="card-name">${p.tool}</div>
+        <div class="card-sub" style="display:flex;gap:6px;align-items:center;margin-top:3px">
+          ${accessBadge(p.access_level)} ${riskBadge(p.risk_level)}
+        </div>
+      </div>
+      <div class="card-right"><span class="chevron">›</span></div>
+    </div>`;
+
+  const neverVerifiedCount = active.filter(p => !p.last_verified).length;
+  const verifyBanner = neverVerifiedCount > 0
+    ? `<div class="verify-banner">
+        <span style="font-size:18px">⚠️</span>
+        <span class="verify-banner-text">${neverVerifiedCount} permission${neverVerifiedCount > 1 ? 's' : ''} never reviewed — tap to start audit</span>
+        <span style="color:#CC7700;font-size:14px;font-weight:600">›</span>
+      </div>` : '';
+
+  document.getElementById('main').innerHTML = `
+    <div class="detail-hero animate">
+      <div class="detail-icon">${agent.icon}</div>
+      <div>
+        <div class="detail-name">${agent.name}</div>
+        <div class="detail-sub">${agent.provider} · ${agent.type}</div>
+      </div>
+    </div>
+
+    ${verifyBanner}
+
+    ${active.length > 0 ? `
+    <div class="section animate">
+      <div class="section-header">Active Permissions (${active.length})</div>
+      <div class="card-group">${active.map(permRow).join('')}</div>
+    </div>` : ''}
+
+    ${inactive.length > 0 ? `
+    <div class="section animate">
+      <div class="section-header">Inactive (${inactive.length})</div>
+      <div class="card-group" style="opacity:0.6">${inactive.map(permRow).join('')}</div>
+    </div>` : ''}
+
+    ${active.length === 0 && inactive.length === 0 ? `
+    <div class="empty animate">
+      <div class="empty-icon">🗝️</div>
+      <div class="empty-title">No permissions yet</div>
+      <div class="empty-sub">Tap + to grant ${agent.name} access to a tool or service</div>
+    </div>` : ''}
+
+    <div class="btn-group animate">
+      <button class="btn btn-primary" onclick="showAddPermission('${agent.id}')">+ Grant New Permission</button>
+      <button class="btn btn-danger" onclick="confirmDeleteAgent('${agent.id}', '${agent.name}')">Remove ${agent.name}</button>
+    </div>
+  `;
+}
+
+async function showPermission(permId) {
+  const allPerms = await api.get('/api/permissions');
+  const permission = allPerms.find(p => p.id === permId);
+  navigate('permission-detail', { permission });
+}
+
+async function renderPermissionDetail() {
+  const p = state.permission;
+  const agent = state.agent;
+  updateTopbar(true, agent ? agent.name : 'Back', p.tool);
+  document.getElementById('fab').style.display = 'none';
+
+  const scopeDisplay = p.scopes
+    ? `<span class="info-value mono">${p.scopes}</span>`
+    : `<span class="info-value warning">Not documented — review needed</span>`;
+
+  const notesHtml = p.notes
+    ? `<div class="section animate" style="margin-top:20px">
+        <div class="section-header">Notes</div>
+        <div class="card-group">
+          <div class="info-row"><span class="info-value" style="color:var(--gray-3);font-size:14px;line-height:1.5">${p.notes}</span></div>
+        </div>
+      </div>` : '';
+
+  const isActive = p.status === 'Active';
+
+  document.getElementById('main').innerHTML = `
+    <div class="detail-hero animate">
+      <div class="detail-icon" style="background:${p.risk_level==='High'?'rgba(255,59,48,0.1)':p.risk_level==='Medium'?'rgba(255,149,0,0.1)':'rgba(52,199,89,0.1)'}">
+        ${p.risk_level === 'High' ? '🔐' : p.risk_level === 'Medium' ? '🔑' : '🗝️'}
+      </div>
+      <div>
+        <div class="detail-name">${p.tool}</div>
+        <div class="detail-sub" style="display:flex;gap:6px;align-items:center;margin-top:5px">
+          ${statusBadge(p.status)} ${riskBadge(p.risk_level)}
+        </div>
+      </div>
+    </div>
+
+    <div class="section animate">
+      <div class="section-header">Purpose</div>
+      <div class="card-group">
+        <div class="info-row">
+          <span class="info-value" style="line-height:1.5">${p.purpose || '<span style="color:var(--gray-5)">Not documented</span>'}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section animate">
+      <div class="section-header">Access Details</div>
+      <div class="card-group">
+        <div class="info-row">
+          <span class="info-label">Access level</span>
+          ${accessBadge(p.access_level)}
+        </div>
+        <div class="info-row">
+          <span class="info-label">Platform</span>
+          <span class="info-value">${p.platform || '—'}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Login type</span>
+          <span class="info-value">${p.login_type || '—'}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">2FA</span>
+          <span class="info-value ${!p.two_fa_enabled && p.risk_level !== 'Low' ? 'warning' : ''}">${p.two_fa_enabled ? '✓ Enabled' : 'Not enabled'}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Scopes</span>
+          ${scopeDisplay}
+        </div>
+      </div>
+    </div>
+
+    <div class="section animate">
+      <div class="section-header">History</div>
+      <div class="card-group">
+        <div class="info-row">
+          <span class="info-label">Granted</span>
+          <span class="info-value">${formatDate(p.granted_date)}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Last verified</span>
+          <span class="info-value ${!p.last_verified ? 'warning' : ''}">${p.last_verified ? formatDate(p.last_verified) : 'Never reviewed'}</span>
+        </div>
+      </div>
+    </div>
+
+    ${notesHtml}
+
+    <div class="btn-group animate">
+      ${!p.last_verified ? `<button class="btn btn-secondary" onclick="markVerified('${p.id}')">✓ Mark as Reviewed Today</button>` : ''}
+      ${isActive
+        ? `<button class="btn btn-danger" onclick="revokePermission('${p.id}', '${p.tool}')">Revoke Access</button>`
+        : `<button class="btn btn-primary" onclick="restorePermission('${p.id}')">Restore Access</button>`
+      }
+    </div>
+  `;
+}
+
+function renderAddAgent() {
+  updateTopbar(true, 'Home', 'New Agent');
+  document.getElementById('fab').style.display = 'none';
+
+  document.getElementById('main').innerHTML = `
+    <div style="padding:20px 16px 0">
+      <div class="greeting-line" style="font-size:22px">Add an agent</div>
+      <div class="greeting-sub">Any AI tool that can take actions on your behalf</div>
+    </div>
+
+    <div class="form-group animate">
+      <label class="form-label">Name</label>
+      <input id="f-name" class="form-field" type="text" placeholder="e.g. Cursor AI" autocomplete="off">
+    </div>
+    <div class="form-group animate">
+      <label class="form-label">Provider</label>
+      <input id="f-provider" class="form-field" type="text" placeholder="e.g. Anysphere">
+    </div>
+    <div class="form-group animate">
+      <label class="form-label">Type</label>
+      <select id="f-type" class="form-field">
+        <option value="assistant">Assistant</option>
+        <option value="engineer">Engineer</option>
+        <option value="analyst">Analyst</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <div class="form-group animate">
+      <label class="form-label">Icon (emoji)</label>
+      <input id="f-icon" class="form-field" type="text" placeholder="✨" maxlength="4">
+    </div>
+    <div class="form-group animate">
+      <label class="form-label">Status</label>
+      <select id="f-status" class="form-field">
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+      </select>
+    </div>
+    <div class="btn-group animate">
+      <button class="btn btn-primary" onclick="saveAgent()">Save Agent</button>
+    </div>
+  `;
+}
+
+function renderAddPermission(agentId) {
+  updateTopbar(true, state.agent ? state.agent.name : 'Back', 'New Permission');
+  document.getElementById('fab').style.display = 'none';
+  const agents = state.agents;
+
+  document.getElementById('main').innerHTML = `
+    <div style="padding:20px 16px 0">
+      <div class="greeting-line" style="font-size:22px">Grant access</div>
+      <div class="greeting-sub">Define exactly what this agent is allowed to do</div>
+    </div>
+
+    ${!agentId ? `<div class="form-group animate">
+      <label class="form-label">Agent</label>
+      <select id="f-agent" class="form-field">
+        ${agents.map(a => `<option value="${a.id}">${a.name}</option>`).join('')}
+      </select>
+    </div>` : `<input type="hidden" id="f-agent" value="${agentId}">`}
+
+    <div class="form-group animate">
+      <label class="form-label">Tool or service</label>
+      <input id="f-tool" class="form-field" type="text" placeholder="e.g. Notion MCP, QuickBooks">
+    </div>
+    <div class="form-group animate">
+      <label class="form-label">Purpose</label>
+      <textarea id="f-purpose" class="form-field" placeholder="Why does this agent need this access?"></textarea>
+    </div>
+    <div class="form-group animate">
+      <label class="form-label">Access level</label>
+      <select id="f-access" class="form-field">
+        <option value="Read-Only">Read-Only — can see but not change</option>
+        <option value="Viewer">Viewer</option>
+        <option value="Editor" selected>Editor — can read and write</option>
+        <option value="Admin">Admin — full control including billing/users</option>
+        <option value="API">API — programmatic access only</option>
+      </select>
+    </div>
+    <div class="form-group animate">
+      <label class="form-label">Scopes <span style="color:var(--gray-5);font-weight:400;text-transform:none;letter-spacing:0">(what specifically can it do?)</span></label>
+      <textarea id="f-scopes" class="form-field" placeholder="e.g. Read calendar, create events — no deletion"></textarea>
+    </div>
+    <div class="form-group animate">
+      <label class="form-label">Platform</label>
+      <select id="f-platform" class="form-field">
+        <option value="Local">Local (MCP / on-device)</option>
+        <option value="Google">Google</option>
+        <option value="Apple">Apple</option>
+        <option value="Meta">Meta</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div class="form-group animate">
+      <label class="form-label">Login type</label>
+      <select id="f-logintype" class="form-field">
+        <option value="MCP Token">MCP Token</option>
+        <option value="API Key">API Key</option>
+        <option value="Password">Password</option>
+        <option value="Google OAuth">Google OAuth</option>
+        <option value="Apple OAuth">Apple OAuth</option>
+        <option value="SSO">SSO</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div class="form-group animate">
+      <label class="form-label">Risk level</label>
+      <select id="f-risk" class="form-field">
+        <option value="Low">Low — limited or reversible access</option>
+        <option value="Medium" selected>Medium — meaningful but monitored</option>
+        <option value="High">High — admin, billing, or sensitive data</option>
+      </select>
+    </div>
+    <div class="form-group animate">
+      <label class="form-label">2FA enabled?</label>
+      <select id="f-2fa" class="form-field">
+        <option value="false">No</option>
+        <option value="true">Yes</option>
+      </select>
+    </div>
+    <div class="form-group animate">
+      <label class="form-label">Notes</label>
+      <textarea id="f-notes" class="form-field" placeholder="Anything else worth knowing..."></textarea>
+    </div>
+    <div class="btn-group animate" style="margin-bottom:40px">
+      <button class="btn btn-primary" onclick="savePermission()">Save Permission</button>
+    </div>
+  `;
+}
+
+// ── Actions ───────────────────────────────────────────────────────────────────
+async function saveAgent() {
+  const agent = {
+    name:     document.getElementById('f-name').value.trim(),
+    provider: document.getElementById('f-provider').value.trim(),
+    type:     document.getElementById('f-type').value,
+    icon:     document.getElementById('f-icon').value.trim() || '🤖',
+    status:   document.getElementById('f-status').value,
+  };
+  if (!agent.name) return alert('Please enter a name.');
+  await api.post('/api/agents', agent);
+  state.viewHistory = [];
+  state.view = 'dashboard';
+  render();
+}
+
+async function savePermission() {
+  const agentEl = document.getElementById('f-agent');
+  const perm = {
+    agent_id:     agentEl.tagName === 'SELECT' ? agentEl.value : agentEl.value,
+    tool:         document.getElementById('f-tool').value.trim(),
+    purpose:      document.getElementById('f-purpose').value.trim(),
+    access_level: document.getElementById('f-access').value,
+    scopes:       document.getElementById('f-scopes').value.trim(),
+    platform:     document.getElementById('f-platform').value,
+    login_type:   document.getElementById('f-logintype').value,
+    risk_level:   document.getElementById('f-risk').value,
+    two_fa_enabled: document.getElementById('f-2fa').value === 'true',
+    notes:        document.getElementById('f-notes').value.trim(),
+    status:       'Active',
+    granted_date: new Date().toISOString().split('T')[0],
+    last_verified: null,
+  };
+  if (!perm.tool) return alert('Please enter a tool name.');
+  await api.post('/api/permissions', perm);
+  goBack();
+}
+
+async function markVerified(permId) {
+  await api.put(`/api/permissions/${permId}`, { last_verified: new Date().toISOString().split('T')[0] });
+  const allPerms = await api.get('/api/permissions');
+  state.permission = allPerms.find(p => p.id === permId);
+  render();
+}
+
+async function revokePermission(permId, toolName) {
+  if (!confirm(`Revoke access to ${toolName}? This will mark it as inactive.`)) return;
+  await api.put(`/api/permissions/${permId}`, { status: 'Inactive' });
+  goBack();
+}
+
+async function restorePermission(permId) {
+  await api.put(`/api/permissions/${permId}`, { status: 'Active', granted_date: new Date().toISOString().split('T')[0] });
+  const allPerms = await api.get('/api/permissions');
+  state.permission = allPerms.find(p => p.id === permId);
+  render();
+}
+
+async function confirmDeleteAgent(agentId, agentName) {
+  if (!confirm(`Remove ${agentName} and all its permissions? This cannot be undone.`)) return;
+  await api.del(`/api/agents/${agentId}`);
+  state.viewHistory = [];
+  state.view = 'dashboard';
+  render();
+}
+
+function showAddPermission(agentId) {
+  navigate('add-permission', {});
+  renderAddPermission(agentId);
+}
+
+function showFabAction() {
+  if (state.view === 'dashboard' || state.view === 'add-agent') {
+    navigate('add-agent');
+  } else if (state.view === 'agent-detail') {
+    showAddPermission(state.agent.id);
+  }
+}
+
+// ── Render dispatcher ─────────────────────────────────────────────────────────
+async function render() {
+  document.getElementById('main').innerHTML = '<div style="padding:40px;text-align:center;color:var(--gray-5)">Loading…</div>';
+  window.scrollTo(0,0);
+
+  switch (state.view) {
+    case 'dashboard':       await renderDashboard();      break;
+    case 'agent-detail':    await renderAgentDetail();    break;
+    case 'permission-detail': await renderPermissionDetail(); break;
+    case 'add-agent':       renderAddAgent();             break;
+    case 'add-permission':  renderAddPermission(state.agent?.id); break;
+  }
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
