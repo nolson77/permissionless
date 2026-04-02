@@ -62,10 +62,6 @@ html, body {
 }
 .back-btn.visible { display: flex; }
 .back-arrow { font-size: 18px; line-height: 1; margin-top: -1px; }
-.topbar-title {
-  font-size: 17px; font-weight: 600; color: var(--gray-1);
-  letter-spacing: -0.3px;
-}
 .wordmark {
   font-size: 17px; font-weight: 700; color: var(--gray-1);
   letter-spacing: -0.8px;
@@ -77,6 +73,27 @@ html, body {
   padding: 0 0 40px;
   -webkit-overflow-scrolling: touch;
 }
+
+/* ── Bottom tab bar ──────────────────────────────────────────────────────── */
+.tab-bar {
+  display: flex;
+  background: rgba(242,242,247,0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--separator);
+  padding: 8px 0 12px;
+  flex-shrink: 0;
+}
+.tab-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 4px 0; cursor: pointer; background: none; border: none;
+  font-family: var(--font); color: var(--gray-4);
+  transition: color var(--transition);
+}
+.tab-item.active { color: var(--primary); }
+.tab-icon { font-size: 22px; line-height: 1; }
+.tab-label { font-size: 10px; font-weight: 500; letter-spacing: 0.02em; }
+.tab-bar.hidden { display: none; }
 
 /* ── Sections ─────────────────────────────────────────────────────────────── */
 .section { padding: 0 16px; margin-top: 28px; }
@@ -187,13 +204,9 @@ html, body {
 .stat-label { font-size: 12px; color: var(--gray-4); margin-top: 2px; font-weight: 500; }
 
 /* ── Greeting ─────────────────────────────────────────────────────────────── */
-.greeting {
-  padding: 22px 20px 0;
-}
-.greeting-line {
-  font-size: 28px; font-weight: 700; letter-spacing: -0.8px; color: var(--gray-1);
-}
-.greeting-sub { font-size: 15px; color: var(--gray-4); margin-top: 4px; }
+.greeting { padding: 22px 20px 0; }
+.greeting-line { font-size: 28px; font-weight: 700; letter-spacing: -0.8px; color: var(--gray-1); }
+.greeting-sub  { font-size: 15px; color: var(--gray-4); margin-top: 4px; }
 
 /* ── Detail page ──────────────────────────────────────────────────────────── */
 .detail-hero {
@@ -226,7 +239,7 @@ html, body {
   width: 110px; padding-top: 1px;
 }
 .info-value { font-size: 15px; color: var(--gray-1); font-weight: 500; flex: 1; }
-.info-value.mono { font-family: 'SF Mono', 'Menlo', monospace; font-size: 13px; color: var(--gray-3); }
+.info-value.mono { font-family: 'SF Mono', 'Menlo', monospace; font-size: 13px; color: var(--gray-3); word-break: break-all; }
 .info-value.warning { color: var(--orange); }
 .info-value.danger  { color: var(--red);    }
 
@@ -239,13 +252,13 @@ html, body {
   cursor: pointer; border: none; transition: opacity var(--transition);
 }
 .btn:active { opacity: 0.75; }
-.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary   { background: var(--primary); color: #fff; }
 .btn-secondary { background: var(--surface); color: var(--primary); box-shadow: var(--shadow-sm); }
-.btn-danger  { background: var(--surface); color: var(--red); box-shadow: var(--shadow-sm); }
+.btn-danger    { background: var(--surface); color: var(--red);     box-shadow: var(--shadow-sm); }
 
 /* ── Fab (add) ────────────────────────────────────────────────────────────── */
 .fab {
-  position: fixed; bottom: 28px; right: 20px;
+  position: fixed; bottom: 80px; right: 20px;
   width: 52px; height: 52px; border-radius: 50%;
   background: var(--primary); color: #fff;
   font-size: 26px; line-height: 1;
@@ -281,9 +294,9 @@ textarea.form-field { resize: vertical; min-height: 80px; line-height: 1.5; }
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   padding: 48px 32px; text-align: center;
 }
-.empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.4; }
+.empty-icon  { font-size: 48px; margin-bottom: 16px; opacity: 0.4; }
 .empty-title { font-size: 20px; font-weight: 600; color: var(--gray-3); }
-.empty-sub { font-size: 15px; color: var(--gray-5); margin-top: 6px; }
+.empty-sub   { font-size: 15px; color: var(--gray-5); margin-top: 6px; }
 
 /* ── Animations ──────────────────────────────────────────────────────────── */
 @keyframes fadeUp {
@@ -305,9 +318,141 @@ textarea.form-field { resize: vertical; min-height: 80px; line-height: 1.5; }
 .verify-banner-text { flex: 1; font-size: 14px; color: #CC7700; font-weight: 500; }
 
 /* ── Risk indicator ──────────────────────────────────────────────────────── */
-.risk-row {
-  display: flex; align-items: center; gap: 6px;
+.risk-row { display: flex; align-items: center; gap: 6px; }
+
+/* ── iOS Toggle Switch ───────────────────────────────────────────────────── */
+.toggle-wrap {
+  position: relative; display: inline-block;
+  width: 51px; height: 31px; flex-shrink: 0;
 }
+.toggle-wrap input { opacity: 0; width: 0; height: 0; position: absolute; }
+.toggle-track {
+  position: absolute; inset: 0;
+  border-radius: 15.5px; background: var(--gray-6);
+  cursor: pointer;
+  transition: background 0.25s ease;
+}
+.toggle-track::after {
+  content: '';
+  position: absolute; left: 2px; top: 2px;
+  width: 27px; height: 27px; border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.toggle-wrap input:checked + .toggle-track { background: var(--green); }
+.toggle-wrap input:checked + .toggle-track::after { transform: translateX(20px); }
+
+/* ── Restart notice ──────────────────────────────────────────────────────── */
+.restart-notice {
+  margin: 16px 16px 0;
+  background: rgba(0,122,255,0.08);
+  border: 1px solid rgba(0,122,255,0.2);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 13px; color: var(--primary); line-height: 1.5;
+}
+
+/* ── Tool permission segmented control ─────────────────────────────────── */
+.tool-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; position: relative;
+}
+.tool-row:not(:last-child)::after {
+  content: ''; position: absolute; bottom: 0; left: 16px; right: 0;
+  height: 1px; background: var(--separator);
+}
+.tool-name { font-size: 15px; font-weight: 500; color: var(--gray-1); flex: 1; padding-right: 12px; }
+.seg-ctrl {
+  display: flex; border-radius: 8px; overflow: hidden;
+  border: 1px solid var(--separator); flex-shrink: 0;
+}
+.seg-btn {
+  padding: 5px 10px; font-size: 11px; font-weight: 600;
+  border: none; background: transparent; cursor: pointer;
+  color: var(--gray-3); transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.seg-btn:not(:last-child) { border-right: 1px solid var(--separator); }
+.seg-btn.active-allow  { background: rgba(52,199,89,0.15);  color: #1a8f3c; }
+.seg-btn.active-ask    { background: rgba(255,149,0,0.15);  color: #b36b00; }
+.seg-btn.active-never  { background: rgba(255,59,48,0.15);  color: #c0392b; }
+
+/* ── MCP card row (no separator offset for toggles) ─────────────────────── */
+.mcp-row {
+  display: flex; align-items: center;
+  padding: 14px 16px;
+  position: relative;
+}
+.mcp-row:not(:last-child)::after {
+  content: '';
+  position: absolute; bottom: 0; left: 16px; right: 0;
+  height: 1px; background: var(--separator);
+}
+.mcp-row-left { flex: 1; min-width: 0; cursor: pointer; padding-right: 12px; }
+.mcp-name { font-size: 17px; font-weight: 500; color: var(--gray-1); letter-spacing: -0.2px; }
+.mcp-cmd  { font-size: 13px; color: var(--gray-4); margin-top: 2px; font-family: 'SF Mono', 'Menlo', monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mcp-row.disabled .mcp-name { color: var(--gray-4); }
+.mcp-row.disabled .mcp-cmd  { color: var(--gray-5); }
+
+/* ── Activity feed ───────────────────────────────────────────────────────── */
+.act-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px;
+}
+.act-row + .act-row { border-top: 1px solid var(--separator); }
+.act-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.act-body { flex: 1; min-width: 0; }
+.act-tool {
+  font-size: 14px; font-weight: 500;
+  font-family: 'SF Mono', 'Menlo', monospace;
+  letter-spacing: -0.3px; color: var(--gray-1);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.act-meta { font-size: 12px; color: var(--gray-4); margin-top: 2px; }
+.act-agent { color: var(--gray-3); font-weight: 500; }
+.act-time { font-size: 12px; color: var(--gray-5); flex-shrink: 0; white-space: nowrap; }
+
+/* Filter chips */
+.filter-row { display: flex; gap: 8px; padding: 8px 16px 4px; flex-wrap: wrap; overflow-x: auto; }
+.filter-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 5px 13px; border-radius: 20px; font-size: 13px; font-weight: 500;
+  background: var(--gray-7); color: var(--gray-3);
+  cursor: pointer; border: none; font-family: var(--font);
+  transition: all var(--transition); white-space: nowrap; flex-shrink: 0;
+}
+.filter-chip.active { background: var(--primary); color: #fff; }
+.filter-chip:active { opacity: 0.7; }
+
+/* Setup guide */
+.setup-block {
+  background: var(--surface); border-radius: var(--radius);
+  padding: 18px; margin: 20px 16px 0; text-align: left;
+  box-shadow: var(--shadow-sm);
+}
+.setup-title { font-size: 11px; font-weight: 600; color: var(--gray-4); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; }
+.setup-code {
+  font-size: 11px; font-family: 'SF Mono', 'Menlo', monospace;
+  background: var(--gray-8); border-radius: var(--radius-sm);
+  padding: 10px 12px; overflow-x: auto; color: var(--gray-2);
+  line-height: 1.65; white-space: pre;
+}
+.setup-note { font-size: 12px; color: var(--gray-5); margin-top: 10px; font-style: italic; }
+
+/* ── Preset chips ────────────────────────────────────────────────────────── */
+.preset-row {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  padding: 0 4px; margin-top: 10px;
+}
+.preset-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 12px; border-radius: 20px; font-size: 14px; font-weight: 500;
+  background: rgba(0,122,255,0.1); color: var(--primary);
+  cursor: pointer; border: none; font-family: var(--font);
+  transition: background var(--transition);
+}
+.preset-chip:active { background: rgba(0,122,255,0.2); }
 </style>
 </head>
 <body>
@@ -316,7 +461,7 @@ textarea.form-field { resize: vertical; min-height: 80px; line-height: 1.5; }
     <div class="topbar-left">
       <button class="back-btn" id="backBtn" onclick="goBack()">
         <span class="back-arrow">‹</span>
-        <span id="backLabel">Agents</span>
+        <span id="backLabel">Back</span>
       </button>
       <span class="wordmark" id="wordmark">permission<span>less</span></span>
     </div>
@@ -326,25 +471,47 @@ textarea.form-field { resize: vertical; min-height: 80px; line-height: 1.5; }
   <div class="scroll-area" id="main"></div>
 
   <button class="fab" id="fab" onclick="showFabAction()" title="Add">+</button>
+
+  <div class="tab-bar" id="tabBar">
+    <button class="tab-item active" id="tab-home" onclick="switchTab('home')">
+      <span class="tab-icon">🏠</span>
+      <span class="tab-label">Home</span>
+    </button>
+    <button class="tab-item" id="tab-mcps" onclick="switchTab('mcps')">
+      <span class="tab-icon">🔌</span>
+      <span class="tab-label">MCPs</span>
+    </button>
+    <button class="tab-item" id="tab-activity" onclick="switchTab('activity')">
+      <span class="tab-icon">📡</span>
+      <span class="tab-label">Activity</span>
+    </button>
+  </div>
 </div>
 
 <script>
 // ── State ─────────────────────────────────────────────────────────────────────
 const state = {
   view: 'dashboard',
+  tab: 'home',
   agent: null,
   permission: null,
   agents: [],
   dashboard: {},
   viewHistory: [],
+  activityFilter: 'all',
 };
+
+// MCP list cache — populated by renderMCPManager, used by showMCPDetail
+let _mcps = [];
+// Currently-open MCP — lets the render dispatcher restore the detail view on back-nav
+let _currentMcp = null;
 
 // ── API ───────────────────────────────────────────────────────────────────────
 const api = {
-  async get(path)         { const r = await fetch(path); return r.json(); },
-  async post(path, body)  { const r = await fetch(path, { method: 'POST',   headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) }); return r.json(); },
-  async put(path, body)   { const r = await fetch(path, { method: 'PUT',    headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) }); return r.json(); },
-  async del(path)         { const r = await fetch(path, { method: 'DELETE' }); return r.json(); },
+  async get(path)        { const r = await fetch(path); return r.json(); },
+  async post(path, body) { const r = await fetch(path, { method: 'POST',   headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) }); return r.json(); },
+  async put(path, body)  { const r = await fetch(path, { method: 'PUT',    headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) }); return r.json(); },
+  async del(path)        { const r = await fetch(path, { method: 'DELETE' }); return r.json(); },
 };
 
 // ── Navigation ────────────────────────────────────────────────────────────────
@@ -362,6 +529,15 @@ function goBack() {
   state.view       = prev.view;
   state.agent      = prev.agent;
   state.permission = prev.permission;
+  render();
+}
+
+function switchTab(tab) {
+  state.tab = tab;
+  state.viewHistory = [];
+  state.view = tab === 'home' ? 'dashboard' : tab === 'activity' ? 'activity' : 'mcp-manager';
+  document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
   render();
 }
 
@@ -389,21 +565,29 @@ function greeting() {
   if (h < 17) return 'Good afternoon';
   return 'Good evening';
 }
+function cmdPreview(cfg) {
+  if (!cfg) return '—';
+  const parts = [cfg.command, ...(cfg.args || [])];
+  const str = parts.filter(Boolean).join(' ');
+  return str.length > 60 ? str.slice(0, 57) + '…' : str;
+}
 
 // ── Topbar ────────────────────────────────────────────────────────────────────
-function updateTopbar(showBack, backLabel = 'Agents', title = '', rightHtml = '') {
-  const back = document.getElementById('backBtn');
+function updateTopbar(showBack, backLabel = 'Back', rightHtml = '') {
+  const back     = document.getElementById('backBtn');
   const wordmark = document.getElementById('wordmark');
-  const titleEl = document.getElementById('topbarTitle');
-  const right = document.getElementById('topbarRight');
+  const right    = document.getElementById('topbarRight');
+  const tabBar   = document.getElementById('tabBar');
 
   if (showBack) {
     back.classList.add('visible');
     document.getElementById('backLabel').textContent = backLabel;
     wordmark.style.display = 'none';
+    tabBar.classList.add('hidden');
   } else {
     back.classList.remove('visible');
     wordmark.style.display = '';
+    tabBar.classList.remove('hidden');
   }
   right.innerHTML = rightHtml;
 }
@@ -414,12 +598,16 @@ async function renderDashboard() {
   updateTopbar(false);
   document.getElementById('fab').style.display = 'flex';
 
-  const [dash, agents] = await Promise.all([
+  const [dash, agents, mcps] = await Promise.all([
     api.get('/api/dashboard'),
     api.get('/api/agents'),
+    api.get('/api/mcp'),
   ]);
   state.agents = agents;
   state.dashboard = dash;
+
+  const activeMcpCount   = mcps.filter(m => m.enabled).length;
+  const disabledMcpCount = mcps.filter(m => !m.enabled).length;
 
   const attentionHtml = dash.attention && dash.attention.length > 0
     ? `<div class="attention-card animate">
@@ -440,22 +628,23 @@ async function renderDashboard() {
       </div>` : '';
 
   const agentCards = agents.map(a => {
-    const riskDot = a.highRiskCount   ? `<span class="badge-dot dot-red"></span>` :
-                    a.mediumRiskCount  ? `<span class="badge-dot dot-orange"></span>` : '';
-    const countLabel = a.activeCount === 1 ? '1 active permission' : `${a.activeCount} active permissions`;
+    const riskDot = a.highRiskCount  ? `<span class="badge-dot dot-red"></span>` :
+                    a.mediumRiskCount ? `<span class="badge-dot dot-orange"></span>` : '';
+    const countLabel = a.activeCount === 1 ? '1 active' : `${a.activeCount} active`;
     return `
       <div class="card-row" onclick="showAgent('${a.id}')">
         <div class="card-icon">${a.icon}</div>
         <div class="card-body">
           <div class="card-name">${a.name}</div>
-          <div class="card-sub">${a.provider} · ${a.type}</div>
+          <div class="card-sub">${a.provider} · ${countLabel}</div>
         </div>
-        <div class="card-right">
-          ${riskDot}
-          <span class="chevron">›</span>
-        </div>
+        <div class="card-right">${riskDot}<span class="chevron">›</span></div>
       </div>`;
   }).join('');
+
+  const mcpStatusLabel = activeMcpCount === 0
+    ? `<span style="color:var(--gray-5)">None connected</span>`
+    : `${activeMcpCount} active${disabledMcpCount > 0 ? `, ${disabledMcpCount} paused` : ''}`;
 
   document.getElementById('main').innerHTML = `
     <div class="greeting animate">
@@ -474,7 +663,7 @@ async function renderDashboard() {
       </div>
       <div class="stat-card">
         <div class="stat-value ${dash.neverVerifiedCount > 0 ? 'orange' : ''}">${dash.neverVerifiedCount}</div>
-        <div class="stat-label">Never verified</div>
+        <div class="stat-label">Unreviewed</div>
       </div>
     </div>
 
@@ -483,6 +672,20 @@ async function renderDashboard() {
     <div class="section animate">
       <div class="section-header">Your Agents</div>
       <div class="card-group">${agentCards}</div>
+    </div>
+
+    <div class="section animate">
+      <div class="section-header">Claude MCPs</div>
+      <div class="card-group">
+        <div class="card-row" onclick="switchTab('mcps')">
+          <div class="card-icon" style="background:rgba(0,122,255,0.1)">🔌</div>
+          <div class="card-body">
+            <div class="card-name">MCP Connections</div>
+            <div class="card-sub">${mcpStatusLabel}</div>
+          </div>
+          <div class="card-right"><span class="chevron">›</span></div>
+        </div>
+      </div>
     </div>
   `;
 }
@@ -567,10 +770,26 @@ async function showPermission(permId) {
   navigate('permission-detail', { permission });
 }
 
+// Navigate to a permission detail from the MCPs tab (native connectors)
+async function goToPermission(agentId, permId) {
+  const [agents, allPerms] = await Promise.all([
+    api.get('/api/agents'),
+    api.get('/api/permissions')
+  ]);
+  const agent = agents.find(a => a.id === agentId);
+  const permission = allPerms.find(p => p.id === permId);
+  if (!permission) return;
+  state.viewHistory.push({ view: state.view, agent: state.agent, permission: state.permission });
+  state.view = 'permission-detail';
+  if (agent) state.agent = agent;
+  state.permission = permission;
+  render();
+}
+
 async function renderPermissionDetail() {
   const p = state.permission;
   const agent = state.agent;
-  updateTopbar(true, agent ? agent.name : 'Back', p.tool);
+  updateTopbar(true, agent ? agent.name : 'Back');
   document.getElementById('fab').style.display = 'none';
 
   const scopeDisplay = p.scopes
@@ -661,8 +880,436 @@ async function renderPermissionDetail() {
   `;
 }
 
+// ── MCP Manager ───────────────────────────────────────────────────────────────
+
+async function renderMCPManager() {
+  updateTopbar(false);
+  document.getElementById('fab').style.display = 'flex';
+
+  const [mcps, allPerms] = await Promise.all([
+    api.get('/api/mcp'),
+    api.get('/api/permissions?agent_id=claude')
+  ]);
+  _mcps = mcps; // cache for showMCPDetail
+  const active   = mcps.filter(m => m.enabled);
+  const disabled = mcps.filter(m => !m.enabled);
+
+  // Find "native" connectors: Claude permissions with MCP tool that aren't in the config file
+  const configNames = new Set(mcps.map(m => m.name.toLowerCase()));
+  const nativePerms = allPerms.filter(p => {
+    if (p.platform !== 'Claude Native') return false;
+    const toolKey = p.tool.toLowerCase().replace(/\s+mcp$/i, '').replace(/\s+/g, '-');
+    return !configNames.has(toolKey) && !configNames.has(p.tool.toLowerCase());
+  });
+
+  const mcpRow = (m) => `
+    <div class="mcp-row ${m.enabled ? '' : 'disabled'}">
+      <div class="mcp-row-left" onclick="showMCPDetail('${m.name}')">
+        <div class="mcp-name">${m.name}</div>
+        <div class="mcp-cmd">${cmdPreview(m.config)}</div>
+      </div>
+      <label class="toggle-wrap" title="${m.enabled ? 'Disable' : 'Enable'} ${m.name}">
+        <input type="checkbox" ${m.enabled ? 'checked' : ''} onchange="toggleMCP('${m.name}', this)">
+        <span class="toggle-track"></span>
+      </label>
+    </div>`;
+
+  const nativeRow = (p) => `
+    <div class="mcp-row" onclick="goToPermission('${p.agent_id}', '${p.id}')" style="cursor:pointer">
+      <div class="mcp-row-left">
+        <div class="mcp-name">${p.tool}</div>
+        <div class="mcp-cmd" style="color:#34c759">✓ Connected via Claude Settings</div>
+      </div>
+      <span style="font-size:11px;color:#8e8e93;padding:4px 8px;background:#f2f2f7;border-radius:8px;white-space:nowrap">Native</span>
+    </div>`;
+
+  const emptyState = mcps.length === 0 && nativePerms.length === 0
+    ? `<div class="empty animate">
+        <div class="empty-icon">🔌</div>
+        <div class="empty-title">No MCPs configured</div>
+        <div class="empty-sub">Tap + to connect your first tool to Claude</div>
+      </div>` : '';
+
+  document.getElementById('main').innerHTML = `
+    <div class="greeting animate">
+      <div class="greeting-line" style="font-size:24px">MCP Connections</div>
+      <div class="greeting-sub">Tools Claude can use — toggle to pause without removing</div>
+    </div>
+
+    <div class="restart-notice animate">
+      ⚡ Changes to config-file MCPs take effect after restarting Claude Desktop
+    </div>
+
+    ${active.length > 0 ? `
+    <div class="section animate">
+      <div class="section-header">Active (${active.length})</div>
+      <div class="card-group">${active.map(mcpRow).join('')}</div>
+    </div>` : ''}
+
+    ${disabled.length > 0 ? `
+    <div class="section animate">
+      <div class="section-header">Paused (${disabled.length})</div>
+      <div class="card-group" style="opacity:0.7">${disabled.map(mcpRow).join('')}</div>
+    </div>` : ''}
+
+    ${nativePerms.length > 0 ? `
+    <div class="section animate">
+      <div class="section-header">Native Connectors (${nativePerms.length})</div>
+      <div class="card-group">${nativePerms.map(nativeRow).join('')}</div>
+      <div style="font-size:12px;color:#8e8e93;padding:8px 12px;line-height:1.4">
+        These are managed through Claude Desktop Settings, not the config file. Tap to view permission details.
+      </div>
+    </div>` : ''}
+
+    ${emptyState}
+  `;
+}
+
+async function toggleMCP(name, checkbox) {
+  checkbox.disabled = true;
+  try {
+    const result = await api.put(`/api/mcp/${encodeURIComponent(name)}/toggle`, {});
+    // Re-render to reflect new state (active ↔ paused section)
+    await renderMCPManager();
+  } catch (e) {
+    checkbox.checked = !checkbox.checked; // revert
+    alert('Could not update MCP. Is Permissionless running?');
+  }
+}
+
+function showMCPDetail(name) {
+  const mcp = _mcps.find(m => m.name === name);
+  if (!mcp) return;
+  state.viewHistory.push({ view: state.view, agent: state.agent, permission: state.permission });
+  state.view = 'mcp-detail';
+  _currentMcp = mcp;
+  renderMCPDetail(mcp);
+}
+
+async function renderMCPDetail(mcp) {
+  _currentMcp = mcp;
+  updateTopbar(true, 'MCPs');
+  document.getElementById('fab').style.display = 'none';
+
+  const cfg = mcp.config || {};
+  const envRows = cfg.env ? Object.entries(cfg.env).map(([k, v]) => `
+    <div class="info-row">
+      <span class="info-label mono" style="font-size:13px;font-family:'SF Mono','Menlo',monospace">${k}</span>
+      <span class="info-value mono">${v.length > 40 ? v.slice(0, 37) + '…' : v}</span>
+    </div>`).join('') : '';
+
+  // Fetch tool permissions
+  let tools = [];
+  try { tools = await api.get(`/api/mcp/${encodeURIComponent(mcp.name)}/tools`); } catch {}
+
+  const permLabel = { always_allow: 'Always Allow', always_ask: 'Ask', never_allow: 'Never' };
+  const toolRow = (t) => `
+    <div class="tool-row">
+      <div class="tool-name">${t.label || t.name}</div>
+      <div class="seg-ctrl">
+        <button class="seg-btn ${t.permission === 'always_allow' ? 'active-allow' : ''}"
+          onclick="setToolPermission('${mcp.name}', '${t.name}', 'always_allow')">Always</button>
+        <button class="seg-btn ${t.permission === 'always_ask' ? 'active-ask' : ''}"
+          onclick="setToolPermission('${mcp.name}', '${t.name}', 'always_ask')">Ask</button>
+        <button class="seg-btn ${t.permission === 'never_allow' ? 'active-never' : ''}"
+          onclick="setToolPermission('${mcp.name}', '${t.name}', 'never_allow')">Never</button>
+      </div>
+    </div>`;
+
+  document.getElementById('main').innerHTML = `
+    <div class="detail-hero animate">
+      <div class="detail-icon" style="background:rgba(0,122,255,0.1); font-size:26px">🔌</div>
+      <div>
+        <div class="detail-name">${mcp.name}</div>
+        <div class="detail-sub" style="display:flex;gap:8px;align-items:center;margin-top:5px">
+          <span class="badge ${mcp.enabled ? 'badge-green' : 'badge-gray'}">${mcp.enabled ? 'Active' : 'Paused'}</span>
+        </div>
+      </div>
+    </div>
+
+    ${tools.length > 0 ? `
+    <div class="section animate">
+      <div class="section-header">Tool Permissions (${tools.length})</div>
+      <div class="card-group">${tools.map(toolRow).join('')}</div>
+      <div style="font-size:12px;color:var(--gray-4);padding:8px 12px;line-height:1.4">
+        Changes saved here — mirror these settings in Claude Desktop → Customize to apply them.
+      </div>
+    </div>` : `
+    <div class="section animate">
+      <div class="section-header">Tool Permissions</div>
+      <div class="card-group">
+        <div style="padding:16px;text-align:center;color:var(--gray-4);font-size:14px">
+          No tools on record yet.<br>
+          <span style="font-size:12px">Connect this MCP and check Claude Desktop → Customize to see available tools.</span>
+        </div>
+      </div>
+    </div>`}
+
+    <div class="section animate">
+      <div class="section-header">Command</div>
+      <div class="card-group">
+        <div class="info-row">
+          <span class="info-label">Executable</span>
+          <span class="info-value mono">${cfg.command || '—'}</span>
+        </div>
+        ${cfg.args && cfg.args.length > 0 ? `
+        <div class="info-row">
+          <span class="info-label">Arguments</span>
+          <span class="info-value mono">${cfg.args.join(' ')}</span>
+        </div>` : ''}
+      </div>
+    </div>
+
+    ${envRows ? `
+    <div class="section animate">
+      <div class="section-header">Environment Variables</div>
+      <div class="card-group">${envRows}</div>
+    </div>` : ''}
+
+    <div class="btn-group animate">
+      <button class="btn btn-primary" onclick="showEditMCPEnv('${mcp.name}')">✏️ Edit Credentials</button>
+      <button class="btn btn-${mcp.enabled ? 'secondary' : 'primary'}" onclick="toggleFromDetail('${mcp.name}', ${mcp.enabled})">
+        ${mcp.enabled ? '⏸ Pause this MCP' : '▶ Enable this MCP'}
+      </button>
+      <button class="btn btn-danger" onclick="confirmDeleteMCP('${mcp.name}')">Remove from Claude</button>
+    </div>
+    <div style="padding:0 16px;margin-top:10px">
+      <p style="font-size:13px;color:var(--gray-4);text-align:center;line-height:1.5">
+        Restart Claude Desktop after making changes
+      </p>
+    </div>
+  `;
+}
+
+async function setToolPermission(mcpName, toolName, permission) {
+  await api.put(`/api/mcp/${encodeURIComponent(mcpName)}/tools/${encodeURIComponent(toolName)}`, { permission });
+  // Re-render to reflect the new state
+  if (_currentMcp) await renderMCPDetail(_currentMcp);
+}
+
+async function toggleFromDetail(name, currentlyEnabled) {
+  await api.put(`/api/mcp/${encodeURIComponent(name)}/toggle`, {});
+  // Re-render detail with updated state
+  const mcps = await api.get('/api/mcp');
+  const updated = mcps.find(m => m.name === name);
+  if (updated) renderMCPDetail(updated);
+}
+
+async function confirmDeleteMCP(name) {
+  if (!confirm(`Remove "${name}" from Claude Desktop?\n\nThis deletes it from claude_desktop_config.json. You can add it back later.`)) return;
+  await api.del(`/api/mcp/${encodeURIComponent(name)}`);
+  goBack();
+}
+
+function showEditMCPEnv(name) {
+  const mcp = _mcps.find(m => m.name === name);
+  if (!mcp) return;
+  state.viewHistory.push({ view: state.view, agent: state.agent, permission: state.permission });
+  state.view = 'edit-mcp-env';
+  renderEditMCPEnv(mcp);
+}
+
+function renderEditMCPEnv(mcp) {
+  updateTopbar(true, mcp.name);
+  document.getElementById('fab').style.display = 'none';
+
+  const cfg = mcp.config || {};
+  const env = cfg.env || {};
+  const args = cfg.args || [];
+
+  // Build editable env var rows — one per existing key, plus empty row to add new
+  const envKeys = Object.keys(env);
+  const envRowsHtml = envKeys.map((k, i) => `
+    <div class="info-row" style="gap:8px;padding:10px 16px;">
+      <input class="form-field" style="flex:1;min-width:0;padding:10px 12px;font-size:14px;font-family:'SF Mono','Menlo',monospace"
+        placeholder="KEY" value="${k}" id="env-key-${i}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+      <input class="form-field" style="flex:2;min-width:0;padding:10px 12px;font-size:14px;font-family:'SF Mono','Menlo',monospace"
+        placeholder="value" value="${env[k]}" id="env-val-${i}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    </div>`).join('');
+
+  const argsHtml = `
+    <div class="info-row" style="padding:10px 16px;">
+      <textarea id="edit-args" class="form-field" style="font-family:'SF Mono','Menlo',monospace;font-size:13px;min-height:60px"
+        autocomplete="off" autocorrect="off" spellcheck="false"
+        placeholder="one argument per line">${args.join('\n')}</textarea>
+    </div>`;
+
+  document.getElementById('main').innerHTML = `
+    <div style="padding:20px 16px 0">
+      <div class="greeting-line" style="font-size:22px">${mcp.name}</div>
+      <div class="greeting-sub">Edit credentials and settings</div>
+    </div>
+
+    <div class="restart-notice animate" style="margin-top:16px">
+      ⚡ Save changes, then restart Claude Desktop to apply
+    </div>
+
+    ${envKeys.length > 0 ? `
+    <div class="section animate">
+      <div class="section-header">Environment Variables</div>
+      <div class="card-group" id="env-rows">${envRowsHtml}</div>
+    </div>` : `
+    <div class="section animate">
+      <div class="section-header">Environment Variables</div>
+      <div class="card-group">
+        <div class="info-row" style="padding:14px 16px;">
+          <span class="info-value" style="color:var(--gray-4);font-size:15px">No env vars configured for this MCP.</span>
+        </div>
+      </div>
+    </div>`}
+
+    <div class="section animate">
+      <div class="section-header">Arguments <span style="color:var(--gray-5);font-weight:400;text-transform:none;letter-spacing:0">(one per line)</span></div>
+      <div class="card-group">${argsHtml}</div>
+    </div>
+
+    <div class="btn-group animate" style="margin-bottom:40px">
+      <button class="btn btn-primary" onclick="saveEditMCPEnv('${mcp.name}', ${envKeys.length})">Save Changes</button>
+    </div>
+  `;
+}
+
+async function saveEditMCPEnv(name, envCount) {
+  // Collect env vars from inputs
+  const env = {};
+  for (let i = 0; i < envCount; i++) {
+    const k = document.getElementById(`env-key-${i}`)?.value.trim();
+    const v = document.getElementById(`env-val-${i}`)?.value.trim();
+    if (k) env[k] = v || '';
+  }
+
+  // Collect args
+  const argsRaw = document.getElementById('edit-args')?.value.trim() || '';
+  const args = argsRaw ? argsRaw.split('\n').map(s => s.trim()).filter(Boolean) : [];
+
+  // Build updated config (preserve command, update args + env)
+  const mcp = _mcps.find(m => m.name === name);
+  const updatedConfig = {
+    command: mcp?.config?.command || 'npx',
+    args,
+    ...(Object.keys(env).length > 0 ? { env } : {}),
+  };
+
+  await api.put(`/api/mcp/${encodeURIComponent(name)}`, { config: updatedConfig });
+
+  // Refresh MCP list cache and go back to detail
+  const mcps = await api.get('/api/mcp');
+  _mcps = mcps;
+  const updated = mcps.find(m => m.name === name);
+  goBack();
+  if (updated) renderMCPDetail(updated);
+}
+
+function renderAddMCP() {
+  updateTopbar(true, 'MCPs');
+  document.getElementById('fab').style.display = 'none';
+
+  document.getElementById('main').innerHTML = `
+    <div style="padding:20px 16px 0">
+      <div class="greeting-line" style="font-size:22px">Add an MCP</div>
+      <div class="greeting-sub">Connect a new tool to Claude Desktop</div>
+    </div>
+
+    <div class="form-group animate">
+      <label class="form-label">Quick-add a preset</label>
+      <div class="preset-row">
+        <button class="preset-chip" onclick="fillPreset('gmail')">📧 Gmail</button>
+        <button class="preset-chip" onclick="fillPreset('gdrive')">📁 Google Drive</button>
+        <button class="preset-chip" onclick="fillPreset('slack')">💬 Slack</button>
+        <button class="preset-chip" onclick="fillPreset('filesystem')">🗂 Filesystem</button>
+        <button class="preset-chip" onclick="fillPreset('postgres')">🐘 Postgres</button>
+      </div>
+    </div>
+
+    <div class="form-group animate">
+      <label class="form-label">MCP Name <span style="color:var(--gray-5);font-weight:400;text-transform:none;letter-spacing:0">(key in config, e.g. "gmail")</span></label>
+      <input id="mcp-name" class="form-field" type="text" placeholder="e.g. gmail" autocomplete="off" style="font-family:'SF Mono','Menlo',monospace">
+    </div>
+
+    <div class="form-group animate">
+      <label class="form-label">Command</label>
+      <select id="mcp-cmdtype" class="form-field" onchange="updateCmdHint()">
+        <option value="npx">npx (Node package)</option>
+        <option value="uvx">uvx (Python package)</option>
+        <option value="node">node (local script)</option>
+        <option value="python3">python3 (local script)</option>
+        <option value="custom">Custom executable</option>
+      </select>
+    </div>
+
+    <div class="form-group animate">
+      <label class="form-label">Package or path <span style="color:var(--gray-5);font-weight:400;text-transform:none;letter-spacing:0">(first argument after command)</span></label>
+      <input id="mcp-pkg" class="form-field" type="text" placeholder="e.g. @modelcontextprotocol/server-gmail" autocomplete="off" style="font-family:'SF Mono','Menlo',monospace">
+    </div>
+
+    <div class="form-group animate">
+      <label class="form-label">Additional arguments <span style="color:var(--gray-5);font-weight:400;text-transform:none;letter-spacing:0">(optional, one per line)</span></label>
+      <textarea id="mcp-args" class="form-field" placeholder="--port 3001&#10;--verbose" style="font-family:'SF Mono','Menlo',monospace;font-size:14px"></textarea>
+    </div>
+
+    <div class="form-group animate">
+      <label class="form-label">Environment variables <span style="color:var(--gray-5);font-weight:400;text-transform:none;letter-spacing:0">(optional, KEY=value per line)</span></label>
+      <textarea id="mcp-env" class="form-field" placeholder="GOOGLE_CLIENT_ID=your-client-id&#10;GOOGLE_CLIENT_SECRET=your-secret" style="font-family:'SF Mono','Menlo',monospace;font-size:14px"></textarea>
+    </div>
+
+    <div class="btn-group animate" style="margin-bottom:40px">
+      <button class="btn btn-primary" onclick="saveMCP()">Add to Claude Desktop</button>
+    </div>
+  `;
+}
+
+const MCP_PRESETS = {
+  gmail:      { name: 'gmail',      cmd: 'npx', pkg: '@modelcontextprotocol/server-gmail',      args: [],     env: { GMAIL_CLIENT_ID: '', GMAIL_CLIENT_SECRET: '', GMAIL_REFRESH_TOKEN: '' } },
+  gdrive:     { name: 'gdrive',     cmd: 'npx', pkg: '@modelcontextprotocol/server-gdrive',     args: [],     env: { GDRIVE_CLIENT_ID: '', GDRIVE_CLIENT_SECRET: '' } },
+  slack:      { name: 'slack',      cmd: 'npx', pkg: '@modelcontextprotocol/server-slack',      args: [],     env: { SLACK_BOT_TOKEN: '', SLACK_TEAM_ID: '' } },
+  filesystem: { name: 'filesystem', cmd: 'npx', pkg: '@modelcontextprotocol/server-filesystem', args: ['/Users'], env: {} },
+  postgres:   { name: 'postgres',   cmd: 'npx', pkg: '@modelcontextprotocol/server-postgres',   args: [],     env: { POSTGRES_CONNECTION_STRING: '' } },
+};
+
+function fillPreset(key) {
+  const p = MCP_PRESETS[key];
+  if (!p) return;
+  document.getElementById('mcp-name').value = p.name;
+  document.getElementById('mcp-cmdtype').value = p.cmd;
+  document.getElementById('mcp-pkg').value = p.pkg;
+  document.getElementById('mcp-args').value = p.args.join('\n');
+  const envStr = Object.entries(p.env).map(([k, v]) => `${k}=${v}`).join('\n');
+  document.getElementById('mcp-env').value = envStr;
+}
+
+async function saveMCP() {
+  const name    = document.getElementById('mcp-name').value.trim();
+  const cmdtype = document.getElementById('mcp-cmdtype').value;
+  const pkg     = document.getElementById('mcp-pkg').value.trim();
+  const argsRaw = document.getElementById('mcp-args').value.trim();
+  const envRaw  = document.getElementById('mcp-env').value.trim();
+
+  if (!name) return alert('Please enter a name.');
+  if (!pkg)  return alert('Please enter a package or path.');
+
+  const args = [pkg, ...argsRaw.split('\n').map(s => s.trim()).filter(Boolean)];
+
+  const env = {};
+  envRaw.split('\n').forEach(line => {
+    const idx = line.indexOf('=');
+    if (idx > 0) {
+      const k = line.slice(0, idx).trim();
+      const v = line.slice(idx + 1).trim();
+      if (k) env[k] = v;
+    }
+  });
+
+  const mcpConfig = { command: cmdtype, args };
+  if (Object.keys(env).length > 0) mcpConfig.env = env;
+
+  await api.post('/api/mcp', { name, config: mcpConfig });
+  goBack();
+}
+
+// ── Add Agent / Add Permission forms ─────────────────────────────────────────
+
 function renderAddAgent() {
-  updateTopbar(true, 'Home', 'New Agent');
+  updateTopbar(true, 'Home');
   document.getElementById('fab').style.display = 'none';
 
   document.getElementById('main').innerHTML = `
@@ -706,7 +1353,7 @@ function renderAddAgent() {
 }
 
 function renderAddPermission(agentId) {
-  updateTopbar(true, state.agent ? state.agent.name : 'Back', 'New Permission');
+  updateTopbar(true, state.agent ? state.agent.name : 'Back');
   document.getElementById('fab').style.display = 'none';
   const agents = state.agents;
 
@@ -811,18 +1458,18 @@ async function saveAgent() {
 async function savePermission() {
   const agentEl = document.getElementById('f-agent');
   const perm = {
-    agent_id:     agentEl.tagName === 'SELECT' ? agentEl.value : agentEl.value,
-    tool:         document.getElementById('f-tool').value.trim(),
-    purpose:      document.getElementById('f-purpose').value.trim(),
-    access_level: document.getElementById('f-access').value,
-    scopes:       document.getElementById('f-scopes').value.trim(),
-    platform:     document.getElementById('f-platform').value,
-    login_type:   document.getElementById('f-logintype').value,
-    risk_level:   document.getElementById('f-risk').value,
+    agent_id:      agentEl.value,
+    tool:          document.getElementById('f-tool').value.trim(),
+    purpose:       document.getElementById('f-purpose').value.trim(),
+    access_level:  document.getElementById('f-access').value,
+    scopes:        document.getElementById('f-scopes').value.trim(),
+    platform:      document.getElementById('f-platform').value,
+    login_type:    document.getElementById('f-logintype').value,
+    risk_level:    document.getElementById('f-risk').value,
     two_fa_enabled: document.getElementById('f-2fa').value === 'true',
-    notes:        document.getElementById('f-notes').value.trim(),
-    status:       'Active',
-    granted_date: new Date().toISOString().split('T')[0],
+    notes:         document.getElementById('f-notes').value.trim(),
+    status:        'Active',
+    granted_date:  new Date().toISOString().split('T')[0],
     last_verified: null,
   };
   if (!perm.tool) return alert('Please enter a tool name.');
@@ -864,24 +1511,183 @@ function showAddPermission(agentId) {
 }
 
 function showFabAction() {
-  if (state.view === 'dashboard' || state.view === 'add-agent') {
+  if (state.view === 'mcp-manager') {
+    navigate('add-mcp');
+  } else if (state.view === 'dashboard' || state.view === 'add-agent') {
     navigate('add-agent');
   } else if (state.view === 'agent-detail') {
     showAddPermission(state.agent.id);
   }
 }
 
+// ── Activity Feed ─────────────────────────────────────────────────────────────
+
+function relTime(ts) {
+  if (!ts) return '';
+  const diff = Date.now() - new Date(ts).getTime();
+  const s = Math.floor(diff / 1000);
+  if (s < 60) return `${s}s ago`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  const d = Math.floor(h / 24);
+  if (d < 7) return `${d}d ago`;
+  return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function dateSectionLabel(d) {
+  const today = new Date();
+  const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
+  if (d.toDateString() === today.toDateString()) return 'Today';
+  if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
+  return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+}
+
+function setActivityFilter(f) {
+  state.activityFilter = f;
+  renderActivity();
+}
+
+async function renderActivity() {
+  updateTopbar(false);
+  document.getElementById('fab').style.display = 'none';
+
+  const [events, agents] = await Promise.all([
+    api.get('/api/activity'),
+    api.get('/api/agents'),
+  ]);
+
+  const filter   = state.activityFilter || 'all';
+  const filtered = filter === 'all' ? events : events.filter(e => e.agent_id === filter);
+  const agentMap = {};
+  agents.forEach(a => { agentMap[a.id] = a; });
+
+  // Group by calendar day
+  const groups = {};
+  filtered.forEach(evt => {
+    const d     = evt.timestamp ? new Date(evt.timestamp) : null;
+    const label = d ? dateSectionLabel(d) : 'Unknown';
+    if (!groups[label]) groups[label] = [];
+    groups[label].push(evt);
+  });
+
+  const statusColor = s =>
+    s === 'success' ? 'var(--green)' :
+    s === 'error'   ? 'var(--red)'   : 'var(--orange)';
+
+  const agentLabel = id => {
+    const a = agentMap[id];
+    return a ? `${a.icon} ${a.name}` : id;
+  };
+
+  const filterChips = [
+    `<button class="filter-chip ${filter === 'all' ? 'active' : ''}" onclick="setActivityFilter('all')">All</button>`,
+    ...agents.map(a =>
+      `<button class="filter-chip ${filter === a.id ? 'active' : ''}" onclick="setActivityFilter('${a.id}')">${a.icon} ${a.name}</button>`
+    )
+  ].join('');
+
+  const feedHtml = Object.entries(groups).map(([label, evts]) => `
+    <div class="section animate">
+      <div class="section-header">${label} <span style="font-weight:400;color:var(--gray-5)">(${evts.length})</span></div>
+      <div class="card-group">
+        ${evts.map(evt => `
+          <div class="act-row">
+            <span class="act-dot" style="background:${statusColor(evt.status)}"></span>
+            <div class="act-body">
+              <div class="act-tool">${evt.tool_name}</div>
+              <div class="act-meta">
+                <span class="act-agent">${agentLabel(evt.agent_id)}</span>
+                <span style="color:var(--gray-6)"> · </span>
+                <span>${evt.mcp_name}</span>
+              </div>
+            </div>
+            <span class="act-time">${relTime(evt.timestamp)}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+
+  const loggerPath = '~/Documents/Python/permissionless/src/logger.js';
+
+  const setupHtml = `
+    <div class="empty animate" style="padding-top:32px">
+      <div class="empty-icon">📡</div>
+      <div class="empty-title">No activity yet</div>
+      <div class="empty-sub" style="max-width:270px">Wrap your MCPs with the Permissionless logger to automatically track every tool call</div>
+    </div>
+    <div class="setup-block animate">
+      <div class="setup-title">Setup — wrap each MCP in claude_desktop_config.json</div>
+      <div class="setup-title" style="margin-top:14px;color:var(--gray-5)">Before (original entry):</div>
+      <pre class="setup-code">"notion": {
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-notion"],
+  "env": { "NOTION_API_KEY": "sk-..." }
+}</pre>
+      <div class="setup-title" style="margin-top:14px;color:var(--primary)">After (wrapped with logger):</div>
+      <pre class="setup-code">"notion": {
+  "command": "node",
+  "args": [
+    "${loggerPath}",
+    "notion",
+    "npx", "-y", "@modelcontextprotocol/server-notion"
+  ],
+  "env": { "NOTION_API_KEY": "sk-..." }
+}</pre>
+      <div class="setup-note">Repeat for each MCP (notion, linear, github…), then restart Claude Desktop</div>
+    </div>`;
+
+  const totalCount  = events.length;
+  const todayCount  = (groups['Today'] || []).length;
+  const subtitle    = totalCount === 0
+    ? 'No events logged yet'
+    : `${totalCount.toLocaleString()} call${totalCount !== 1 ? 's' : ''} logged${todayCount > 0 ? ` · ${todayCount} today` : ''}`;
+
+  document.getElementById('main').innerHTML = `
+    <div class="greeting animate">
+      <div class="greeting-line" style="font-size:24px">Activity</div>
+      <div class="greeting-sub">${subtitle}</div>
+    </div>
+
+    ${totalCount > 0 ? `<div class="filter-row animate">${filterChips}</div>` : ''}
+
+    ${totalCount === 0 ? setupHtml : ''}
+    ${filtered.length === 0 && totalCount > 0
+      ? `<div class="empty animate" style="padding-top:32px"><div class="empty-sub">No events for this agent</div></div>`
+      : feedHtml
+    }
+  `;
+}
+
 // ── Render dispatcher ─────────────────────────────────────────────────────────
 async function render() {
   document.getElementById('main').innerHTML = '<div style="padding:40px;text-align:center;color:var(--gray-5)">Loading…</div>';
-  window.scrollTo(0,0);
+  window.scrollTo(0, 0);
 
-  switch (state.view) {
-    case 'dashboard':       await renderDashboard();      break;
-    case 'agent-detail':    await renderAgentDetail();    break;
-    case 'permission-detail': await renderPermissionDetail(); break;
-    case 'add-agent':       renderAddAgent();             break;
-    case 'add-permission':  renderAddPermission(state.agent?.id); break;
+  try {
+    switch (state.view) {
+      case 'dashboard':         await renderDashboard();                        break;
+      case 'agent-detail':      await renderAgentDetail();                      break;
+      case 'permission-detail': await renderPermissionDetail();                 break;
+      case 'add-agent':         renderAddAgent();                               break;
+      case 'add-permission':    renderAddPermission(state.agent?.id);           break;
+      case 'activity':          await renderActivity();                         break;
+      case 'mcp-manager':       await renderMCPManager();                       break;
+      case 'mcp-detail':    if (_currentMcp) renderMCPDetail(_currentMcp);                    break;
+      case 'edit-mcp-env':  if (_currentMcp) renderEditMCPEnv(_currentMcp);                  break;
+      case 'add-mcp':           renderAddMCP();                                  break;
+    }
+  } catch (err) {
+    console.error('Render error:', err);
+    document.getElementById('main').innerHTML = `
+      <div class="empty" style="padding-top:60px">
+        <div class="empty-icon">⚠️</div>
+        <div class="empty-title">Couldn't connect</div>
+        <div class="empty-sub" style="max-width:240px">Make sure the server is running:<br><code style="font-size:12px;background:var(--gray-7);padding:3px 8px;border-radius:6px">npm start</code></div>
+        <button class="btn btn-primary" style="margin-top:24px;width:auto;padding:12px 28px" onclick="render()">Try again</button>
+      </div>`;
   }
 }
 
